@@ -17,6 +17,9 @@ npm install
 npm run dev
 ```
 
+* GraphQL Playground: [http://localhost:3000/playground](http://localhost:3000/playground)
+* Voyager: [http://localhost:3000/voyager](http://localhost:3000/playground)
+
 ## Example
 
 See `example` folder
