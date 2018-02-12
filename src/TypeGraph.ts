@@ -17,6 +17,14 @@ import { getMetadataArgsStorage } from 'typeorm';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { ColumnMetadataArgs } from 'typeorm/metadata-args/ColumnMetadataArgs';
 import { RelationMetadataArgs } from 'typeorm/metadata-args/RelationMetadataArgs';
+import { TypeGraphOptions } from './interfaces/TypeGraphOptions';
+import { GraphQLSchema } from 'graphql';
+import * as koa from 'koa';
+import * as koaRouter from 'koa-router';
+import * as koaBody from 'koa-bodyparser';
+import { graphqlKoa } from 'apollo-server-koa';
+import { koa as graphVoyager } from 'graphql-voyager/middleware';
+import graphPlayground from 'graphql-playground-middleware-koa';
 
 export interface TypeGraphContext {
   projection: ProjectionType;
@@ -63,6 +71,48 @@ export class TypeGraph {
 
     this.graphTypes.set(typeClass, graphObject);
     return isList ? new GraphQLList(graphObject) : graphObject;
+  }
+
+  private serverConfig: TypeGraphOptions;
+
+  constructor(config: TypeGraphOptions) {
+    this.serverConfig = {
+      ...config,
+    };
+    if (!this.serverConfig.port) this.serverConfig.port = 3000;
+    if (!this.serverConfig.host) this.serverConfig.host = '127.0.0.1';
+  }
+
+  start() {
+    const { port, host, playground, voyager, query, mutation, context } = this.serverConfig;
+    const app = new koa();
+    const router = new koaRouter();
+    const schema = new GraphQLSchema({
+      query: TypeGraph.toGraphQL(query),
+      mutation: TypeGraph.toGraphQL(mutation),
+    });
+    const graphQLRequest = async (ctx: koa.Context) => {
+      return { schema, context };
+    };
+
+    // GraphQL API
+    router.post('/graphql', koaBody(), graphqlKoa(graphQLRequest));
+    router.get('/graphql', graphqlKoa(graphQLRequest));
+
+    // Utils UI
+    if (voyager)
+      router.all('/voyager', graphVoyager({ endpointUrl: '/graphql', displayOptions: {} }));
+
+    if (playground) router.all('/playground', graphPlayground({ endpoint: '/graphql' }));
+
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+
+    app.listen(port, host);
+
+    console.log(`API:\t\thttp://${host}:${port}/graphql`);
+    if (playground) console.log(`Playground:\thttp://${host}:${port}/playground`);
+    if (voyager) console.log(`Voyager:\thttp://${host}:${port}/voyager`);
   }
 
   private static getOrmFields(typeClass: any): { [name: string]: FieldOptions } {
