@@ -166,7 +166,7 @@ export class TypeGraph {
                   ? new GraphQLNonNull(this.toGraphQL(arg.type(), true))
                   : this.toGraphQL(arg.type(), true),
                 description: arg.description,
-                defaultvalue: arg.defaultValue,
+                defaultValue: arg.defaultValue,
               };
             }
           }
@@ -184,6 +184,7 @@ export class TypeGraph {
   }
 
   static getResolve(typeClass: any, resolveFunc: (...args: any[]) => any) {
+    if (!resolveFunc) return;
     return (root, args, context: TypeGraphContext, info) => {
       context.projection = getProjectionFromAST(info);
       const instance = new typeClass();
