@@ -4,7 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/example/index.ts"
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/example/index.ts",
+    "lint": "tslint -p tsconfig.json"
   },
   "author": "",
   "license": "MIT",

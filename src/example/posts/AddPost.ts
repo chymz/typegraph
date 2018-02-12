@@ -1,32 +1,18 @@
-import { Repository } from 'typeorm';
-import { Post } from './Post';
-import { Arg } from '../../decorators/Arg';
 import { GraphQLID, GraphQLScalarType } from 'graphql';
+import { Repository } from 'typeorm';
+import { Arg } from '../../decorators/Arg';
 import { Field } from '../../decorators/Field';
 import { Type } from '../../decorators/Type';
+import { Post } from './Post';
 import { PostEntity } from './PostEntity';
-
-@Type()
-export class PostInput {
-  @Field(type => GraphQLID)
-  id: number;
-
-  @Field() title: string;
-  @Field() body: string;
-
-  @Field(type => [GraphQLID])
-  tags: number[];
-
-  @Field(type => GraphQLID)
-  author: number;
-}
+import { PostInput } from './PostInput';
 
 @Type(type => Post)
 export class AddPostMutation {
   @Arg(type => PostInput, { required: true })
-  input: PostInput;
+  public input: PostInput;
 
-  async resolve(_, { input }, { db, projection }) {
+  public async resolve(_, { input }, { db, projection }) {
     const posts: Repository<PostEntity> = db.getRepository(PostEntity);
 
     // Update post
@@ -52,7 +38,7 @@ export class AddPostMutation {
 
     // Update tags
     if (input.tags) {
-      let relation = db
+      const relation = db
         .createQueryBuilder()
         .relation(PostEntity, 'tags')
         .of(post);

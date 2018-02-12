@@ -1,35 +1,35 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
-  JoinTable,
+  Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { TagEntity } from '../tags/TagEntity';
-import { UserEntity } from '../users/UserEntity';
-import { User } from '../users/User';
 import { Field } from '../../decorators/Field';
 import { Tag } from '../tags/Tag';
+import { TagEntity } from '../tags/TagEntity';
+import { User } from '../users/User';
+import { UserEntity } from '../users/UserEntity';
 
 @Entity('posts')
 export class PostEntity {
-  @PrimaryGeneratedColumn() id: number;
+  @PrimaryGeneratedColumn() public id: number;
 
-  @Column() title: string;
+  @Column() public title: string;
 
-  @Column() body: string;
+  @Column() public body: string;
 
-  @ManyToOne(type => UserEntity)
+  @ManyToOne((type) => UserEntity)
   @JoinColumn()
-  @Field(type => User)
-  author: UserEntity;
+  @Field((type) => User)
+  public author: UserEntity;
 
-  @ManyToMany(type => TagEntity)
+  @ManyToMany((type) => TagEntity)
   @JoinTable({
     name: 'posts_tags',
   })
-  @Field(type => [Tag])
-  tags: TagEntity[];
+  @Field((type) => [Tag])
+  public tags: TagEntity[];
 }

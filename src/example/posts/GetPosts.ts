@@ -1,32 +1,31 @@
-import { Post } from './Post';
-import { Arg } from '../../decorators/Arg';
-import { TypeGraphContext } from '../../TypeGraph';
-import { Type } from '../../decorators/Type';
-import { Field } from '../../decorators/Field';
-import { PaginationInfo } from '../utils/PaginationInfo';
-import { OrderInput } from '../utils/OrderInput';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { PostEntity } from './PostEntity';
+import { Arg } from '../../decorators/Arg';
+import { Field } from '../../decorators/Field';
+import { Type } from '../../decorators/Type';
+import { OrderInput } from '../utils/OrderInput';
+import { PaginationInfo } from '../utils/PaginationInfo';
 import { PaginationInput } from '../utils/PaginationInput';
+import { Post } from './Post';
+import { PostEntity } from './PostEntity';
 
 @Type(/*type => [Post]*/)
 export class GetPostsQuery {
   @Arg({ defaultValue: {} })
-  order: OrderInput;
+  public order: OrderInput;
 
   @Arg({
     defaultValue: {
-      offset: 0,
       limit: 10,
+      offset: 0,
     },
   })
-  pagination: PaginationInput;
+  public pagination: PaginationInput;
 
   @Field(type => [Post])
-  edges: Post[];
-  @Field() paginationInfo: PaginationInfo;
+  public edges: Post[];
+  @Field() public paginationInfo: PaginationInfo;
 
-  async resolve(_, { order, pagination }, { db, projection }, info) {
+  public async resolve(_, { order, pagination }, { db, projection }, info) {
     const repo: Repository<PostEntity> = db.getRepository(PostEntity);
     const query: SelectQueryBuilder<PostEntity> = repo.createQueryBuilder('post').select();
 
@@ -34,8 +33,12 @@ export class GetPostsQuery {
 
     if (projection.edges) {
       const { author, tags } = projection.edges;
-      if (author) query.leftJoinAndSelect('post.author', 'author');
-      if (tags) query.leftJoinAndSelect('post.tags', 'tag');
+      if (author) {
+        query.leftJoinAndSelect('post.author', 'author');
+      }
+      if (tags) {
+        query.leftJoinAndSelect('post.tags', 'tag');
+      }
     }
 
     const [edges, total] = await query.getManyAndCount();
@@ -43,9 +46,9 @@ export class GetPostsQuery {
     return {
       edges,
       paginationInfo: {
-        total,
-        offset: pagination.offset,
         limit: pagination.limit,
+        offset: pagination.offset,
+        total,
       },
     };
   }

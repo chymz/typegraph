@@ -1,3 +1,1 @@
-export interface TypeCallback {
-  (type?): any;
-}
+export type TypeCallback = (type?) => any;

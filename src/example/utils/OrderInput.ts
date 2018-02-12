@@ -1,8 +1,8 @@
-import { Type } from '../../decorators/Type';
 import { Field } from '../../decorators/Field';
+import { Type } from '../../decorators/Type';
 
 @Type()
 export class OrderInput {
-  @Field() field: string;
-  @Field() sort: string;
+  @Field() public field: string;
+  @Field() public sort: string;
 }

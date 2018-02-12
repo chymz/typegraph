@@ -1,26 +1,28 @@
-import { TypeGraph } from '../TypeGraph';
-import { RootQuery } from './RootQuery';
-import { RootMutation } from './RootMutation';
 import { Connection, createConnection } from 'typeorm';
+import { TypeGraph } from '../TypeGraph';
+import { RootMutation } from './RootMutation';
+import { RootQuery } from './RootQuery';
 
 (async () => {
   const db: Connection = await createConnection({
-    type: 'sqlite',
     database: 'database.db',
+    entities: ['src/**/*Entity.ts'],
     logging: false,
     synchronize: true,
-    entities: ['src/**/*Entity.ts'],
+    type: 'sqlite',
   });
 
   const server = new TypeGraph({
-    query: RootQuery,
-    mutation: RootMutation,
-    playground: true,
-    voyager: true,
     context: {
       db,
     },
+    mutation: RootMutation,
+    playground: true,
+    query: RootQuery,
+    voyager: true,
   });
 
   server.start();
+
+  // tslint:disable-next-line
 })().catch(err => console.error(err));

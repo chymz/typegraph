@@ -1,9 +1,7 @@
 import { TypeCallback } from './TypeCallback';
 
-export interface ArgOptions {
+export interface ITypeOptions {
   name?: string;
   description?: string;
-  defaultValue?: any;
   type?: TypeCallback;
-  required?: boolean;
 }

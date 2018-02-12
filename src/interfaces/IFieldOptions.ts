@@ -1,7 +1,8 @@
 import { TypeCallback } from './TypeCallback';
 
-export interface TypeOptions {
+export interface IFieldOptions {
   name?: string;
   description?: string;
   type?: TypeCallback;
+  required?: boolean;
 }

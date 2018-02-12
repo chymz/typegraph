@@ -1,4 +1,4 @@
-export interface TypeGraphOptions {
+export interface ITypeGraphOptions {
   query: any;
   mutation?: any;
   context?: any;

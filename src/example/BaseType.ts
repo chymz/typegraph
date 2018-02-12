@@ -1,7 +1,7 @@
-import { Field } from '../decorators/Field';
 import { GraphQLID } from 'graphql';
+import { Field } from '../decorators/Field';
 
 export class BaseType {
-  @Field(type => GraphQLID, { required: true })
-  id: number;
+  @Field((type) => GraphQLID, { required: true })
+  public id: number;
 }

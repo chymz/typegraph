@@ -1,33 +1,35 @@
-import { Type } from '../decorators/Type';
-import { Field } from '../decorators/Field';
+/* tslint:disable */
+
 import { GraphQLInt } from 'graphql';
-import { ManyToOne, ManyToMany, JoinColumn, JoinTable } from 'typeorm';
-import { UserEntity } from './users/UserEntity';
-import { User } from './users/User';
-import { TagEntity } from './tags/TagEntity';
+import { JoinColumn, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { Field } from '../decorators/Field';
+import { Type } from '../decorators/Type';
 import { Tag } from './tags/Tag';
+import { TagEntity } from './tags/TagEntity';
+import { User } from './users/User';
+import { UserEntity } from './users/UserEntity';
 
 @Type()
 export class Base {
   @Field(type => String)
-  field: any;
+  public field: any;
 }
 
 @Type()
 export class Main extends Base {
   @Field(type => Number)
-  field: any;
+  public field: any;
 
   @ManyToMany(type => TagEntity)
   @JoinTable({
     name: 'posts_tags',
   })
   @Field(type => [Tag])
-  tags: TagEntity[];
+  public tags: TagEntity[];
 }
 
 @Type()
 export class Last extends Main {
   @Field(type => GraphQLInt)
-  field: any;
+  public field: any;
 }

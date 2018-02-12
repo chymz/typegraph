@@ -1,10 +1,10 @@
 import { GraphQLObjectType, GraphQLType } from 'graphql';
 import {
-  GraphQLString,
-  GraphQLFloat,
   GraphQLBoolean,
-  GraphQLInt,
+  GraphQLFloat,
   GraphQLID,
+  GraphQLInt,
+  GraphQLString,
 } from 'graphql/type/scalars';
 
 export const TYPES_MAP: Map<any, GraphQLType> = new Map();
@@ -49,7 +49,7 @@ const stringTypes = [
   'text',
   'longtext',
 ];
-for (const type of boolTypes) TYPES_MAP.set(type, GraphQLBoolean);
-for (const type of floatTypes) TYPES_MAP.set(type, GraphQLFloat);
-for (const type of intTypes) TYPES_MAP.set(type, GraphQLInt);
-for (const type of stringTypes) TYPES_MAP.set(type, GraphQLString);
+for (const type of boolTypes) { TYPES_MAP.set(type, GraphQLBoolean); }
+for (const type of floatTypes) { TYPES_MAP.set(type, GraphQLFloat); }
+for (const type of intTypes) { TYPES_MAP.set(type, GraphQLInt); }
+for (const type of stringTypes) { TYPES_MAP.set(type, GraphQLString); }

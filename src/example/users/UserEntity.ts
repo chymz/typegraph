@@ -1,15 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { PostEntity } from '../posts/PostEntity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Field } from '../../decorators/Field';
 import { Post } from '../posts/Post';
+import { PostEntity } from '../posts/PostEntity';
 
 @Entity('users')
 export class UserEntity {
-  @PrimaryGeneratedColumn() id: number;
+  @PrimaryGeneratedColumn() public id: number;
 
-  @Column() name: string;
+  @Column() public name: string;
 
-  @OneToMany(type => PostEntity, post => post.author)
-  @Field(type => [Post])
-  posts: PostEntity[];
+  @OneToMany((type) => PostEntity, (post) => post.author)
+  @Field((type) => [Post])
+  public posts: PostEntity[];
 }

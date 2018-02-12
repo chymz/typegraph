@@ -1,34 +1,35 @@
-import { TypeGraph } from '../TypeGraph';
-import { TypeOptions } from '../interfaces/TypeOptions';
+import { ITypeData } from '../interfaces/ITypeData';
+import { ITypeOptions } from '../interfaces/ITypeOptions';
 import { TypeCallback } from '../interfaces/TypeCallback';
-import { TypeData } from '../interfaces/TypeData';
+import { TypeGraph } from '../TypeGraph';
 
-export interface TypeDecoratorInterface {
-  (type?: TypeCallback): any;
-  (type?: TypeCallback, opts?: TypeOptions): any;
-  (opts?: TypeOptions): any;
+export interface ITypeDecorator {
+  (optsOrType?: TypeCallback | ITypeOptions): any;
+  (type?: TypeCallback, opts?: ITypeOptions): any;
 }
 
-export const Type: TypeDecoratorInterface = (
-  optsOrType: TypeCallback | TypeOptions = {},
-  opts?: TypeOptions,
+export const Type: ITypeDecorator = (
+  optsOrType: TypeCallback | ITypeOptions = {},
+  opts?: ITypeOptions,
 ): any => {
   return (target: any, propertyKey: string) => {
-    let options: TypeOptions = {};
+    let options: ITypeOptions = {};
 
     if (typeof optsOrType === 'function') {
       options.type = optsOrType;
     }
 
-    if (opts) options = { ...options, ...opts };
+    if (opts) {
+      options = { ...options, ...opts };
+    }
 
     options = {
       ...options,
-      name: options.name || target.name,
       description: options.description || `${target.name} class`,
+      name: options.name || target.name,
     };
 
-    const object: TypeData = { ...TypeGraph.objectTypes.get(target), ...options };
+    const object: ITypeData = { ...TypeGraph.objectTypes.get(target), ...options };
     if (typeof target.prototype.resolve === 'function') {
       object.resolve = target.prototype.resolve;
     }
