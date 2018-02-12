@@ -8,6 +8,8 @@
 
 * Build your GraphQL API with Typescript classes & decorators
 * Use TypeORM entities to build GraphQL objects
+* Koa server
+* Fields projection with graphql-compose
 * GraphQL Playground and Voyager installed
 
 ## Test it !
