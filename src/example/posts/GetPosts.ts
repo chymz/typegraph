@@ -7,6 +7,7 @@ import { PaginationInfo } from '../utils/PaginationInfo';
 import { PaginationInput } from '../utils/PaginationInput';
 import { Post } from './Post';
 import { PostEntity } from './PostEntity';
+import { IResolveContext } from '../../interfaces/IResolveContext';
 
 @Type(/*type => [Post]*/)
 export class GetPostsQuery {
@@ -25,7 +26,9 @@ export class GetPostsQuery {
   public edges: Post[];
   @Field() public paginationInfo: PaginationInfo;
 
-  public async resolve(_, { order, pagination }, { db, projection }, info) {
+  public async resolve({ db, projection }: IResolveContext) {
+    const { pagination } = this;
+
     const repo: Repository<PostEntity> = db.getRepository(PostEntity);
     const query: SelectQueryBuilder<PostEntity> = repo.createQueryBuilder('post').select();
 

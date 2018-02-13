@@ -2,6 +2,7 @@ import { Connection, createConnection } from 'typeorm';
 import { TypeGraph } from '../TypeGraph';
 import { RootMutation } from './RootMutation';
 import { RootQuery } from './RootQuery';
+import { IResolveContext } from '../interfaces/IResolveContext';
 
 (async () => {
   const db: Connection = await createConnection({
@@ -21,6 +22,8 @@ import { RootQuery } from './RootQuery';
     query: RootQuery,
     voyager: true,
   });
+
+  server.addResolveMiddleware(TypeGraph.argsToInstance);
 
   server.start();
 

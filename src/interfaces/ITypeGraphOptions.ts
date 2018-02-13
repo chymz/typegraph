@@ -1,3 +1,4 @@
+import { IResolveContext } from './IResolveContext';
 export interface ITypeGraphOptions {
   query: any;
   mutation?: any;

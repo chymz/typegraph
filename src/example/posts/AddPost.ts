@@ -6,13 +6,17 @@ import { Type } from '../../decorators/Type';
 import { Post } from './Post';
 import { PostEntity } from './PostEntity';
 import { PostInput } from './PostInput';
+import { IResolveContext } from '../../interfaces/IResolveContext';
+import { inspect } from 'util';
 
 @Type(type => Post)
 export class AddPostMutation {
   @Arg(type => PostInput, { required: true })
   public input: PostInput;
 
-  public async resolve(_, { input }, { db, projection }) {
+  public async resolve({ db, projection }: IResolveContext) {
+    const { input } = this;
+
     const posts: Repository<PostEntity> = db.getRepository(PostEntity);
 
     // Update post

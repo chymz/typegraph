@@ -22,9 +22,11 @@ import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { Type } from './decorators/Type';
 import { IArgOptions } from './interfaces/IArgOptions';
 import { IFieldOptions } from './interfaces/IFieldOptions';
+import { IResolveContext } from './interfaces/IResolveContext';
 import { ITypeData } from './interfaces/ITypeData';
 import { ITypeGraphOptions } from './interfaces/ITypeGraphOptions';
 import { TYPES_MAP } from './TYPES_MAP';
+import { inspect } from 'util';
 
 export class TypeGraph {
   public static objectTypes: Map<any, ITypeData> = new Map();
@@ -54,7 +56,7 @@ export class TypeGraph {
 
     // Object have fields
     if (fields) {
-      object.fields = this.fieldsResolver(fields);
+      object.fields = this.fieldsBuilder(fields);
     } else if (data.type) {
       return this.toGraphQL(data.type());
     }
@@ -67,17 +69,71 @@ export class TypeGraph {
     return isList ? new GraphQLList(graphObject) : graphObject;
   }
 
-  public static getResolve(typeClass: any, resolveFunc: (...args: any[]) => any) {
+  public static getFields(
+    typeClass: any,
+    field: string = 'fields',
+  ): { [name: string]: IFieldOptions } {
+    let fields = this.objectTypes.get(typeClass)[field] || {};
+
+    let parent = Object.getPrototypeOf(typeClass);
+    while (this.objectTypes.has(parent)) {
+      fields = { ...this.objectTypes.get(parent)[field], ...fields };
+      parent = Object.getPrototypeOf(parent);
+    }
+
+    if (field === 'fields') {
+      fields = { ...this.getOrmFields(typeClass), ...fields };
+    }
+
+    if (Object.keys(fields).length) {
+      return fields;
+    }
+  }
+
+  public static getResolve(
+    typeClass: any,
+    field: IFieldOptions,
+    resolveFunc: (...args: any[]) => any,
+  ) {
     if (!resolveFunc) {
       return;
     }
-    return (root, args, context, info) => {
-      context.projection = getProjectionFromAST(info);
+    const data: ITypeData = this.classData(typeClass);
+    return (source, args, ctx, info) => {
       const instance = new typeClass();
-      return resolveFunc.bind(instance)(root, args, context, info);
+
+      const context: IResolveContext = {
+        metas: { field, type: typeClass },
+        projection: getProjectionFromAST(info),
+        resolve: { args, context: ctx, info, source },
+        type: data,
+        ...ctx,
+      };
+
+      if (this.resolveMiddlewares.length) {
+        for (const middleware of this.resolveMiddlewares) {
+          if (typeof middleware === 'function') {
+            middleware.bind(instance)(context);
+          }
+        }
+      }
+
+      return resolveFunc.bind(instance)(context);
     };
   }
 
+  public static argsToInstance({ metas, resolve }: IResolveContext) {
+    const { type, field } = metas;
+    const args = TypeGraph.getFields(type, 'args');
+
+    for (const name in resolve.args) {
+      if (args[name]) {
+        this[name] = resolve.args[name];
+      }
+    }
+  }
+
+  private static resolveMiddlewares: any[] = [];
   private static graphTypes: Map<any, GraphQLObjectType | GraphQLInputObjectType> = new Map();
 
   private static getOrmFields(typeClass: any): { [name: string]: IFieldOptions } {
@@ -126,27 +182,6 @@ export class TypeGraph {
     return fields;
   }
 
-  private static getFields(
-    typeClass: any,
-    field: string = 'fields',
-  ): { [name: string]: IFieldOptions } {
-    let fields = this.objectTypes.get(typeClass)[field] || {};
-
-    let parent = Object.getPrototypeOf(typeClass);
-    while (this.objectTypes.has(parent)) {
-      fields = { ...this.objectTypes.get(parent)[field], ...fields };
-      parent = Object.getPrototypeOf(parent);
-    }
-
-    if (field === 'fields') {
-      fields = { ...this.getOrmFields(typeClass), ...fields };
-    }
-
-    if (Object.keys(fields).length) {
-      return fields;
-    }
-  }
-
   private static classData(typeClass: any): ITypeData {
     const isList = Array.isArray(typeClass);
     if (isList) {
@@ -157,7 +192,7 @@ export class TypeGraph {
     }
   }
 
-  private static fieldsResolver(fields: { [name: string]: IFieldOptions }): any {
+  private static fieldsBuilder(fields: { [name: string]: IFieldOptions }): any {
     return () => {
       const output = {};
       for (const fieldName in fields) {
@@ -172,7 +207,10 @@ export class TypeGraph {
 
           // ObjecType
           if (data) {
-            field = { type: this.toGraphQL(type), resolve: this.getResolve(type, data.resolve) };
+            field = {
+              resolve: this.getResolve(type, config, data.resolve),
+              type: this.toGraphQL(type),
+            };
 
             if (data.args) {
               field.args = {};
@@ -263,5 +301,9 @@ export class TypeGraph {
     if (voyager) {
       print(`Voyager:\thttp://${host}:${port}/voyager`);
     }
+  }
+
+  public addResolveMiddleware(func: (context: IResolveContext) => any) {
+    TypeGraph.resolveMiddlewares.push(func);
   }
 }
