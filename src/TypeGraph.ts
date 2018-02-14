@@ -37,9 +37,8 @@ export class TypeGraph {
       typeClass = typeClass[0];
     }
 
-    // If is scalar
-    if (TYPES_MAP.has(typeClass)) {
-      return isList ? new GraphQLList(TYPES_MAP.get(typeClass)) : TYPES_MAP.get(typeClass);
+    if (this.isScalar(typeClass)) {
+      return isList ? new GraphQLList(this.getScalar(typeClass)) : this.getScalar(typeClass);
     }
 
     const data: ITypeData = this.classData(typeClass);
@@ -136,6 +135,14 @@ export class TypeGraph {
 
   private static resolveMiddlewares: any[] = [];
   private static graphTypes: Map<any, GraphQLObjectType | GraphQLInputObjectType> = new Map();
+
+  private static getScalar(input: any) {
+    return TYPES_MAP.get(input);
+  }
+
+  private static isScalar(input: any) {
+    return TYPES_MAP.has(input);
+  }
 
   private static getOrmFields(typeClass: any): { [name: string]: IFieldOptions } {
     const metadata = getMetadataArgsStorage();
