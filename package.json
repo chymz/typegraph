@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/example/index.ts",
     "lint": "tslint -p tsconfig.json"
@@ -24,6 +25,7 @@
     "fs-extra": "^5.0.0",
     "graphql": "^0.13.0",
     "graphql-compose": "^2.13.1",
+    "graphql-iso-date": "^3.5.0",
     "graphql-playground-middleware-koa": "^1.4.2",
     "graphql-voyager": "^1.0.0-rc.11",
     "koa": "^2.4.1",

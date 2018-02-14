@@ -9,4 +9,5 @@ export * from './interfaces/ITypeOptions';
 export * from './interfaces/TypeCallback';
 export * from './interfaces/IResolveContext';
 
+export * from './ScalarTypes';
 export * from './TypeGraph';
