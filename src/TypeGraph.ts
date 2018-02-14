@@ -159,6 +159,7 @@ export class TypeGraph {
       const field: IFieldOptions = {
         description: `${column.propertyName} column`,
         name: column.propertyName,
+        required: column.options.nullable ? false : true,
         type: () => (column.options.primary ? GraphQLID : column.options.type),
       };
 
@@ -174,6 +175,7 @@ export class TypeGraph {
       const field: IFieldOptions = {
         description: `${relation.propertyName} relation`,
         name: relation.propertyName,
+        required: relation.options.nullable ? false : true,
         type: () => (!isList ? relationClass : [relationClass]),
       };
       fields[field.name] = field;
