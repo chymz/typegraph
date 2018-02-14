@@ -270,10 +270,13 @@ export class TypeGraph {
     const { port, host, playground, voyager, query, mutation, context } = this.serverConfig;
     const app = new koa();
     const router = new koaRouter();
-    const schema = new GraphQLSchema({
-      mutation: TypeGraph.toGraphQL(mutation),
-      query: TypeGraph.toGraphQL(query),
-    });
+
+    const schemaConfig: any = { query: TypeGraph.toGraphQL(query) };
+    if (mutation) {
+      schemaConfig.mutation = TypeGraph.toGraphQL(mutation);
+    }
+
+    const schema = new GraphQLSchema(schemaConfig);
     const graphQLRequest = async (ctx: koa.Context) => {
       return { schema, context };
     };
