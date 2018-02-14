@@ -58,7 +58,8 @@ export class TypeGraph {
     if (fields) {
       object.fields = this.fieldsBuilder(fields);
     } else if (data.type) {
-      return this.toGraphQL(data.type());
+      const type = data.type();
+      return this.toGraphQL(type);
     }
 
     const graphObject = !asInputType
@@ -205,7 +206,7 @@ export class TypeGraph {
           const type = config.type();
           const data: ITypeData = this.classData(type);
 
-          let field: any = {};
+          let field: any = { description: config.description };
 
           // ObjecType
           if (data) {
