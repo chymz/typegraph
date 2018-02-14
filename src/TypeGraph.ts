@@ -12,9 +12,9 @@ import { GraphQLSchema } from 'graphql';
 import { getProjectionFromAST, ProjectionType } from 'graphql-compose';
 import graphPlayground from 'graphql-playground-middleware-koa';
 import { koa as graphVoyager } from 'graphql-voyager/middleware';
-import * as koa from 'koa';
+import * as Koa from 'koa';
 import * as koaBody from 'koa-bodyparser';
-import * as koaRouter from 'koa-router';
+import * as KoaRouter from 'koa-router';
 import { getMetadataArgsStorage } from 'typeorm';
 import { ColumnMetadataArgs } from 'typeorm/metadata-args/ColumnMetadataArgs';
 import { RelationMetadataArgs } from 'typeorm/metadata-args/RelationMetadataArgs';
@@ -254,6 +254,9 @@ export class TypeGraph {
     };
   }
 
+  public koa: Koa;
+  public router: KoaRouter;
+
   private serverConfig: ITypeGraphOptions;
 
   constructor(config: ITypeGraphOptions) {
@@ -264,12 +267,13 @@ export class TypeGraph {
     if (!this.serverConfig.host) {
       this.serverConfig.host = '127.0.0.1';
     }
+
+    this.koa = new Koa();
+    this.router = new KoaRouter();
   }
 
   public start() {
     const { port, host, playground, voyager, query, mutation, context } = this.serverConfig;
-    const app = new koa();
-    const router = new koaRouter();
 
     const schemaConfig: any = { query: TypeGraph.toGraphQL(query) };
     if (mutation) {
@@ -277,17 +281,17 @@ export class TypeGraph {
     }
 
     const schema = new GraphQLSchema(schemaConfig);
-    const graphQLRequest = async (ctx: koa.Context) => {
+    const graphQLRequest = async (ctx: Koa.Context) => {
       return { schema, context };
     };
 
     // GraphQL API
-    router.post('/graphql', koaBody(), graphqlKoa(graphQLRequest));
-    router.get('/graphql', graphqlKoa(graphQLRequest));
+    this.router.post('/graphql', koaBody(), graphqlKoa(graphQLRequest));
+    this.router.get('/graphql', graphqlKoa(graphQLRequest));
 
     // Utils UI
     if (voyager) {
-      router.all(
+      this.router.all(
         '/voyager',
         graphVoyager({
           displayOptions: {},
@@ -297,16 +301,14 @@ export class TypeGraph {
     }
 
     if (playground) {
-      router.all('/playground', graphPlayground({ endpoint: '/graphql' }));
+      this.router.all('/playground', graphPlayground({ endpoint: '/graphql' }));
     }
 
-    app.use(router.routes());
-    app.use(router.allowedMethods());
-
-    app.listen(port, host);
+    this.koa.use(this.router.routes());
+    this.koa.use(this.router.allowedMethods());
+    this.koa.listen(port, host);
 
     const print = str => process.stdout.write(`${str}\n`);
-
     print(`API:\t\thttp://${host}:${port}/graphql`);
     if (playground) {
       print(`Playground:\thttp://${host}:${port}/playground`);
@@ -318,5 +320,6 @@ export class TypeGraph {
 
   public addResolveMiddleware(func: (context: IResolveContext) => any) {
     TypeGraph.resolveMiddlewares.push(func);
+    return this;
   }
 }
