@@ -7,5 +7,6 @@ export * from './interfaces/IFieldOptions';
 export * from './interfaces/ITypeData';
 export * from './interfaces/ITypeOptions';
 export * from './interfaces/TypeCallback';
+export * from './interfaces/IResolveContext';
 
 export * from './TypeGraph';

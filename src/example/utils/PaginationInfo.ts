@@ -4,10 +4,10 @@ import { Type } from '../../decorators/Type';
 
 @Type()
 export class PaginationInfo {
-  @Field((type) => GraphQLInt)
+  @Field(type => GraphQLInt)
   public total: number;
-  @Field((type) => GraphQLInt)
+  @Field(type => GraphQLInt)
   public offset: number;
-  @Field((type) => GraphQLInt)
+  @Field(type => GraphQLInt)
   public limit: number;
 }
