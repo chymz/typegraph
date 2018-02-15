@@ -2,7 +2,6 @@
 
 * Better/Tests Input types (args ?)
 * Custom field resolve function
-  * Add args to all resolve, then context `resolve(args: any, context: IResolveContext)`
 
 ```ts
 @Type()

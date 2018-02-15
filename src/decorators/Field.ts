@@ -32,6 +32,14 @@ export const Field: IFieldDecorator = (
       name: options.name || propertyKey,
     };
 
+    // Check field is a function/method
+    if (typeof prototype[propertyKey] === 'function') {
+      if (!options.type) {
+        throw new Error('Field with a resolve callback must define output type');
+      }
+      options.resolve = prototype[propertyKey];
+    }
+
     if (!options.type) {
       options.type = () => Reflect.getMetadata('design:type', prototype, propertyKey);
     }

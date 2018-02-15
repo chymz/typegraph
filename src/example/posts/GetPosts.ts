@@ -26,6 +26,20 @@ export class GetPostsQuery {
   public edges: Post[];
   @Field() public paginationInfo: PaginationInfo;
 
+  @Field(type => String, {
+    args: {
+      input: {
+        defaultValue: 'default',
+        description: 'Some argument on this',
+        type: type => String,
+      },
+    },
+  })
+  public async customData(context: IResolveContext) {
+    console.log(context.resolve.args);
+    return context.resolve.args.input;
+  }
+
   public async resolve({ db, projection }: IResolveContext) {
     const { pagination } = this;
 
