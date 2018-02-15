@@ -91,44 +91,54 @@ export class TypeGraph {
   }
 
   public static getResolve(
-    typeClass: any,
     field: IFieldOptions,
     resolveFunc: (...args: any[]) => any,
+    typeClass?: any,
   ) {
     if (!resolveFunc) {
       return;
     }
-    const data: ITypeData = this.classData(typeClass);
     return (source, args, ctx, info) => {
-      const instance = new typeClass();
+      let resolve = resolveFunc;
+      let instance;
+
+      if (typeClass) {
+        instance = new typeClass();
+        resolve = resolveFunc.bind(instance);
+      }
 
       const context: IResolveContext = {
         metas: { field, type: typeClass },
         projection: getProjectionFromAST(info),
         resolve: { args, context: ctx, info, source },
-        type: data,
         ...ctx,
       };
 
       if (this.resolveMiddlewares.length) {
         for (const middleware of this.resolveMiddlewares) {
           if (typeof middleware === 'function') {
-            middleware.bind(instance)(args, context);
+            if (instance) {
+              middleware.bind(instance)(args, context);
+            } else {
+              middleware(args, context);
+            }
           }
         }
       }
 
-      return resolveFunc.bind(instance)(args, context);
+      return resolve(args, context);
     };
   }
 
   public static argsToInstance(args, { metas, resolve }: IResolveContext) {
     const { type, field } = metas;
-    const classArgs = TypeGraph.getFields(type, 'args');
+    if (type) {
+      const classArgs = TypeGraph.getFields(type, 'args');
 
-    for (const name in args) {
-      if (classArgs[name]) {
-        this[name] = args[name];
+      for (const name in resolve.args) {
+        if (classArgs[name]) {
+          this[name] = resolve.args[name];
+        }
       }
     }
   }
@@ -202,6 +212,23 @@ export class TypeGraph {
     }
   }
 
+  private static getArgs(argsOptions: { [name: string]: IArgOptions }) {
+    const args = {};
+    for (const argName in argsOptions) {
+      if (argsOptions[argName]) {
+        const arg: IArgOptions = argsOptions[argName];
+        args[argName] = {
+          defaultValue: arg.defaultValue,
+          description: arg.description,
+          type: arg.required
+            ? new GraphQLNonNull(this.toGraphQL(arg.type(), true))
+            : this.toGraphQL(arg.type(), true),
+        };
+      }
+    }
+    return args;
+  }
+
   private static fieldsBuilder(fields: { [name: string]: IFieldOptions }): any {
     return () => {
       const output = {};
@@ -218,30 +245,26 @@ export class TypeGraph {
           // ObjecType
           if (data) {
             field = {
-              resolve: this.getResolve(type, config, data.resolve),
+              resolve: this.getResolve(config, data.resolve, type),
               type: this.toGraphQL(type),
             };
 
             if (data.args) {
-              field.args = {};
-              for (const argName in data.args) {
-                if (data.args[argName]) {
-                  const arg: IArgOptions = data.args[argName];
-
-                  field.args[argName] = {
-                    defaultValue: arg.defaultValue,
-                    description: arg.description,
-                    type: arg.required
-                      ? new GraphQLNonNull(this.toGraphQL(arg.type(), true))
-                      : this.toGraphQL(arg.type(), true),
-                  };
-                }
-              }
+              field.args = this.getArgs(data.args);
             }
 
             // Scalar
           } else {
             field.type = this.toGraphQL(type);
+          }
+
+          // Field is a resolve callback
+          if (config.resolve) {
+            field.resolve = this.getResolve(config, config.resolve);
+
+            if (config.args) {
+              field.args = this.getArgs(config.args);
+            }
           }
 
           if (isRequired) {
