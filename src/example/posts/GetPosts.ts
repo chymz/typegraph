@@ -35,9 +35,8 @@ export class GetPostsQuery {
       },
     },
   })
-  public async customData(context: IResolveContext) {
-    console.log(context.resolve.args);
-    return context.resolve.args.input;
+  public async customData(args, context: IResolveContext) {
+    return args.input;
   }
 
   public async resolve(args, { db, projection }: IResolveContext) {

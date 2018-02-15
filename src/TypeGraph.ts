@@ -118,15 +118,15 @@ export class TypeGraph {
         for (const middleware of this.resolveMiddlewares) {
           if (typeof middleware === 'function') {
             if (instance) {
-              middleware.bind(instance)(context);
+              middleware.bind(instance)(args, context);
             } else {
-              middleware(context);
+              middleware(args, context);
             }
           }
         }
       }
 
-      return resolve(context);
+      return resolve(args, context);
     };
   }
 
