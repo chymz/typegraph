@@ -14,7 +14,7 @@ export class AddPostMutation {
   @Arg(type => PostInput, { required: true })
   public input: PostInput;
 
-  public async resolve({ db, projection }: IResolveContext) {
+  public async resolve(args, { db, projection }: IResolveContext) {
     const { input } = this;
 
     const posts: Repository<PostEntity> = db.getRepository(PostEntity);

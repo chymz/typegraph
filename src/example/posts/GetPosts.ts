@@ -40,7 +40,7 @@ export class GetPostsQuery {
     return context.resolve.args.input;
   }
 
-  public async resolve({ db, projection }: IResolveContext) {
+  public async resolve(args, { db, projection }: IResolveContext) {
     const { pagination } = this;
 
     const repo: Repository<PostEntity> = db.getRepository(PostEntity);

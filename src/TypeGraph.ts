@@ -130,7 +130,7 @@ export class TypeGraph {
     };
   }
 
-  public static argsToInstance({ metas, resolve }: IResolveContext) {
+  public static argsToInstance(args, { metas, resolve }: IResolveContext) {
     const { type, field } = metas;
     if (type) {
       const classArgs = TypeGraph.getFields(type, 'args');
@@ -341,7 +341,7 @@ export class TypeGraph {
     }
   }
 
-  public addResolveMiddleware(func: (context: IResolveContext) => any) {
+  public addResolveMiddleware(func: (args: any, context: IResolveContext) => any) {
     TypeGraph.resolveMiddlewares.push(func);
     return this;
   }
