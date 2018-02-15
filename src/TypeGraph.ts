@@ -113,22 +113,22 @@ export class TypeGraph {
       if (this.resolveMiddlewares.length) {
         for (const middleware of this.resolveMiddlewares) {
           if (typeof middleware === 'function') {
-            middleware.bind(instance)(context);
+            middleware.bind(instance)(args, context);
           }
         }
       }
 
-      return resolveFunc.bind(instance)(context);
+      return resolveFunc.bind(instance)(args, context);
     };
   }
 
-  public static argsToInstance({ metas, resolve }: IResolveContext) {
+  public static argsToInstance(args, { metas, resolve }: IResolveContext) {
     const { type, field } = metas;
-    const args = TypeGraph.getFields(type, 'args');
+    const classArgs = TypeGraph.getFields(type, 'args');
 
-    for (const name in resolve.args) {
-      if (args[name]) {
-        this[name] = resolve.args[name];
+    for (const name in args) {
+      if (classArgs[name]) {
+        this[name] = args[name];
       }
     }
   }
@@ -318,7 +318,7 @@ export class TypeGraph {
     }
   }
 
-  public addResolveMiddleware(func: (context: IResolveContext) => any) {
+  public addResolveMiddleware(func: (args: any, context: IResolveContext) => any) {
     TypeGraph.resolveMiddlewares.push(func);
     return this;
   }
