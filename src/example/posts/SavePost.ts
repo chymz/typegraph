@@ -10,7 +10,7 @@ import { IResolveContext } from '../../interfaces/IResolveContext';
 import { inspect } from 'util';
 
 @Type(type => Post)
-export class AddPostMutation {
+export class SavePostMutation {
   @Arg(type => PostInput, { required: true })
   public input: PostInput;
 
@@ -20,7 +20,7 @@ export class AddPostMutation {
     const posts: Repository<PostEntity> = db.getRepository(PostEntity);
 
     // Update post
-    const post = input.id ? await posts.findOneById(input.id) : new PostEntity();
+    const post = input.id ? await posts.findOne(input.id) : new PostEntity();
     post.title = input.title;
     post.body = input.body;
 
@@ -47,15 +47,14 @@ export class AddPostMutation {
         .relation(PostEntity, 'tags')
         .of(post);
 
-      // TypeORM bug: addAndRemove() doesnt remove :(
       await db
         .createQueryBuilder()
         .delete()
         .from('posts_tags')
-        .where('posts_tags.postsId = :postId', { postId: post.id, tagsIds: input.tags })
+        .where('posts_tags.postsId = :postId', { postId: post.id })
         .execute();
 
-      await relation.addAndRemove(input.tags, input.tags);
+      await relation.add(input.tags);
 
       if (projection.tags) {
         post.tags = await relation.loadMany();

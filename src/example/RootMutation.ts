@@ -1,9 +1,9 @@
 import { Field } from '../decorators/Field';
 import { Type } from '../decorators/Type';
-import { AddPostMutation } from './posts/AddPost';
+import { SavePostMutation } from './posts/SavePost';
 import { Post } from './posts/Post';
 
 @Type()
 export class RootMutation {
-  @Field() public addPost: AddPostMutation;
+  @Field() public savePost: SavePostMutation;
 }
